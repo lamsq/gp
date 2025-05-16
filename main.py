@@ -2,7 +2,8 @@ import RPi.GPIO as GPIO
 import subprocess
 import time
 import os
-from facial_recognition import run_facial_recognition
+#from facial_recognition import run_facial_recognition
+from facial_recognition import face_recognizer
 
 # GPIO setup
 GPIO.setmode(GPIO.BCM)
@@ -28,6 +29,7 @@ blue_pwm.start(0)
 # Path to motor.py
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 MOTOR_SCRIPT = os.path.join(SCRIPT_DIR, "motor.py")
+MOTOR_SCRIPT_II = os.path.join(SCRIPT_DIR, "motorII.py")
 
 def set_led_color(red, green, blue):
     """Set RGB LED color (0-100 duty cycle for each color)"""
@@ -35,7 +37,7 @@ def set_led_color(red, green, blue):
     green_pwm.ChangeDutyCycle(green)
     blue_pwm.ChangeDutyCycle(blue)
 
-def run_motor_script():
+def run_motor_open():
     """Run motor control script"""
     try:
         subprocess.run(["python3", MOTOR_SCRIPT], check=True)
@@ -44,6 +46,19 @@ def run_motor_script():
         print(f"Error: {MOTOR_SCRIPT} not found.")
     except subprocess.CalledProcessError as e:
         print(f"Error running motor.py: {e}")
+        
+        
+def run_motor_close():
+    """Run motor control script"""
+    try:
+        subprocess.run(["python3", MOTOR_SCRIPT_II], check=True)
+        print("motorII.py executed successfully.")
+    except FileNotFoundError:
+        print(f"Error: {MOTOR_SCRIPT} not found.")
+    except subprocess.CalledProcessError as e:
+        print(f"Error running motor.py: {e}")
+        
+        
 
 try:
     # Initial state: Red LED
@@ -54,18 +69,16 @@ try:
         if GPIO.input(MOTION_SENSOR_PIN):
             print("\nMotion detected! Starting facial recognition...")
             
-            # Yellow LED during recognition (Red + Green)
-            set_led_color(100, 0, 0)
             
-            # Run facial recognition
-            if run_facial_recognition():
-                # Green LED for success
-                set_led_color(100, 0, 100)
+            set_led_color(100, 0, 0) # Yellow LED during recognition (Red + Green)
+            
+            if face_recognizer.run_facial_recognition():
+                set_led_color(100, 0, 100) # Green LED for success
                 print("Authorized face recognized! Running motor script...")
-                run_motor_script()
-            else:
-                # Red LED for failure
-                set_led_color(0, 100, 100)
+                run_motor_open()
+                
+            else:                
+                set_led_color(0, 100, 100) # Red LED for failure
                 print("No authorized face detected or recognition timed out.")
             
             # Add cooldown period
@@ -77,15 +90,16 @@ try:
         
         # Small delay to reduce CPU usage
         time.sleep(0.1)
+        
 
 except KeyboardInterrupt:
     print("\nScript terminated by user.")
-    GPIO.cleanup()
+    #GPIO.cleanup()
 
 finally:
     # Clean up
-    red_pwm.stop()
-    green_pwm.stop()
-    blue_pwm.stop()
-    GPIO.cleanup()
+    #red_pwm.stop()
+    #green_pwm.stop()
+    #blue_pwm.stop()
+    #GPIO.cleanup()
     print("GPIO cleaned up.")
