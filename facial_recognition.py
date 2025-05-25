@@ -36,7 +36,6 @@ class FaceRecognizer:
         face_encodings = []
         face_names = []
         recognized = False
-        
         # Resize the frame using cv_scaler to increase performance
         resized_frame = cv2.resize(frame, (0, 0), fx=(1/self.cv_scaler), fy=(1/self.cv_scaler))
         
@@ -59,6 +58,7 @@ class FaceRecognizer:
             if matches[best_match_index]:
                 name = self.known_face_names[best_match_index]
                 recognized = True
+                
             face_names.append(name)
         
         return face_locations, face_names, recognized
@@ -92,12 +92,14 @@ class FaceRecognizer:
         return self.fps
 
     def run_facial_recognition(self):
+        time_limit = 10
+        match_counter = 0
+        match_needed = 7
         try:
-            print("started fr")
             self.initialize_camera()  # Reinitialize camera for each run
             
             # We'll process frames for a limited time (e.g., 10 seconds)
-            end_time = time.time() + 20
+            end_time = time.time() + time_limit
             while time.time() < end_time:
                 # Capture a frame from camera
                 frame = self.picam2.capture_array()
@@ -105,9 +107,14 @@ class FaceRecognizer:
                 # Process the frame
                 face_locations, face_names, recognized = self.process_frame(frame)
                 
-                # If recognized, return True immediately
+                # If recognized, add match counter 
                 if recognized:
-                    return True
+                    # If recognized in specified amount of frames, return true
+                    match_counter += 1
+                    print(match_counter)
+                    if match_counter >= match_needed:
+                        return True
+                    #print(face_names)
                 
                 # Draw results
                 display_frame = self.draw_results(frame, face_locations, face_names)
