@@ -19,6 +19,8 @@ RED_PIN = 25   # GPIO 31 (Red)
 GREEN_PIN = 23  # GPIO 29 (Green)
 BLUE_PIN = 24   # GPIO 33 (Blue)
 
+BUTTON_PIN = 13  # KY-004 connected to GPIO 13
+
 #LCD screen init
 lcd = CharLCD('PCF8574', 0x27)
 
@@ -35,6 +37,7 @@ GPIO.setup(MAGNETIC_SENSOR_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)  # Magnetic s
 GPIO.setup(RED_PIN, GPIO.OUT)
 GPIO.setup(GREEN_PIN, GPIO.OUT)
 GPIO.setup(BLUE_PIN, GPIO.OUT)
+GPIO.setup(BUTTON_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)  # Enable internal pull-up resistor
 
 # Initialize PWM for smooth color transitions
 red_pwm = GPIO.PWM(RED_PIN, 100)    # 100Hz frequency
@@ -49,7 +52,14 @@ door_closed = True # INITIAL STATE OF THE DOOR TODO: SET UP
 # Path to motor scripts
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 MOTOR_SCRIPT = os.path.join(SCRIPT_DIR, "motor.py")
-MOTOR_SCRIPT_II = os.path.join(SCRIPT_DIR, "motorII.py")	
+MOTOR_SCRIPT_II = os.path.join(SCRIPT_DIR, "motorII.py")
+
+#Create a button logic variables
+
+# Variables for double-click detection
+LONG_PRESS_TIME = 1.5  # 1 second for long press
+DEBOUNCE_TIME = 0.03   # 50ms debounce
+
 
 def set_led_color(red, green, blue):
     """Set RGB LED color (0-100 duty cycle for each color)"""
@@ -92,8 +102,10 @@ def check_magnet():
         if GPIO.input(MAGNETIC_SENSOR_PIN) == GPIO.HIGH:
             print("Magnet detected! Running close motor...")
             set_led_color(50, 0, 100) # YELLOW for wait
-            
+            lcd.clear()
+            lcd.write_string("Door Closing")
             run_motor_close()
+            lcd.clear()
             # Small delay to prevent multiple triggers
             time.sleep(2)
             return True
@@ -101,15 +113,22 @@ def check_magnet():
  
 
 try:
-
-
-    
     while True:
         set_led_color(100, 100, 100)
-        
-#         set_led_color(100, 0, 0)
-        # Check magnet first
         check_magnet()
+
+        # Wait for button press
+        if GPIO.input(BUTTON_PIN) == GPIO.LOW and door_closed:  # Button pressed (KY-004 pulls to GND when pressed)
+            print("opening the door")
+            lcd.clear()
+            lcd.write_string("Move out the way")
+            run_motor_open()
+            lcd.clear()
+            
+#         set_led_color(100, 0, 100)  # Update LED after button action
+        time.sleep(0.1)  # Cooldown to avoid repeats
+               
+           # Check magnet first         
         if GPIO.input(MOTION_SENSOR_PIN) and door_closed:
             print("Motion detected! Starting facial recognition...")
             
@@ -133,7 +152,8 @@ try:
                 lcd.clear()
                 lcd.write_string("Welcome Home \r\n"+ name)
 
-                time.sleep(3)
+                time.sleep(5)
+                lcd.clear()
             else:                
                 set_led_color(50, 100, 0) # Purple LED for failure
                 print("No authorized face detected or recognition timed out.")
@@ -143,13 +163,13 @@ try:
                 lcd.clear()
 
             # Add REMOVE cooldown period
-#             print("Resuming motion monitoring in 5 seconds...")
+            print("Resuming motion monitoring in 5 seconds...")
             
-#             set_led_color(50, 0, 100) # YELLOW for wait
-#             time.sleep(2)
+            #set_led_color(50, 0, 100) # YELLOW for wait
+            #time.sleep(2)
             
         # Small delay to reduce CPU usage
-        time.sleep(1)
+        time.sleep(0.5)
         
 except KeyboardInterrupt:
     print("Script terminated by user.")
