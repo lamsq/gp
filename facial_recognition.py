@@ -20,7 +20,7 @@ class FaceRecognizer:
         self.frame_count = 0
         self.start_time = time.time()
         self.fps = 0
-        
+        self.name = ""
     def initialize_camera(self):
         """Initialize or reinitialize the camera"""
         try:
@@ -57,12 +57,16 @@ class FaceRecognizer:
             
             if matches[best_match_index]:
                 name = self.known_face_names[best_match_index]
+                self.name = name
                 recognized = True
                 
             face_names.append(name)
         
         return face_locations, face_names, recognized
 
+    def getName(self):
+        return self.name.pop(0).capitalize()
+    
     def draw_results(self, frame, face_locations, face_names):
         # Display the results
         for (top, right, bottom, left), name in zip(face_locations, face_names):
@@ -111,8 +115,11 @@ class FaceRecognizer:
                 if recognized:
                     # If recognized in specified amount of frames, return true
                     match_counter += 1
+                    self.name = face_names
+                    print(self.name)
                     print(match_counter)
                     if match_counter >= match_needed:
+                        
                         return True
                     #print(face_names)
                 

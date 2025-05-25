@@ -3,6 +3,7 @@ import subprocess
 import time
 import os
 
+from RPLCD.i2c import CharLCD
 # import board
 # import busio
 # import adafruit_character_lcd.character_lcd_i2c as character_lcd
@@ -19,7 +20,9 @@ GREEN_PIN = 23  # GPIO 29 (Green)
 BLUE_PIN = 24   # GPIO 33 (Blue)
 
 #LCD screen init
-#lcd = LCD(2, 0x3F, True)
+lcd = CharLCD('PCF8574', 0x27)
+
+# lcd = LCD(2, 0x3F, True)
 # i2c = busio.I2C(board.SCL, board.SDA)
 # cols = 16
 # rows = 2
@@ -99,7 +102,8 @@ def check_magnet():
 
 try:
 
-#     lcd.message("Hello")
+
+    
     while True:
         set_led_color(100, 100, 100)
         
@@ -107,19 +111,37 @@ try:
         # Check magnet first
         check_magnet()
         if GPIO.input(MOTION_SENSOR_PIN) and door_closed:
-            print("\nMotion detected! Starting facial recognition...")
+            print("Motion detected! Starting facial recognition...")
             
             set_led_color(100, 100, 0) # BLUE LED during recognition (Red + Green)
-            
+            lcd.clear()
+            lcd.write_string("Identify \r\nYourself...")
+            time.sleep(2)
+            lcd.clear()
+            lcd.write_string("Watch in the\r\nCamera")
+
             if face_recognizer.run_facial_recognition():
                 print("Authorized face recognized! Running motor script...")
+                
+                name = face_recognizer.getName()
+                lcd.clear()
+                lcd.write_string("Please wait...\r\n" + name)
+
                 run_motor_open()
-                set_led_color(100, 0, 100) # Green LED for success
+                set_led_color(100, 0, 100) # Green LED for
+                
+                lcd.clear()
+                lcd.write_string("Welcome Home \r\n"+ name)
+
                 time.sleep(3)
             else:                
                 set_led_color(50, 100, 0) # Purple LED for failure
                 print("No authorized face detected or recognition timed out.")
-            
+                lcd.clear()
+                lcd.write_string("No Authorized\r\nFace Detected")
+                time.sleep(2)
+                lcd.clear()
+
             # Add REMOVE cooldown period
 #             print("Resuming motion monitoring in 5 seconds...")
             
@@ -130,10 +152,18 @@ try:
         time.sleep(1)
         
 except KeyboardInterrupt:
-    print("\nScript terminated by user.")
+    print("Script terminated by user.")
+    # Clean up
+    lcd.clear()
+    red_pwm.stop()
+    green_pwm.stop()
+    blue_pwm.stop()
+    GPIO.cleanup()
+    print("GPIO cleaned up.")
 
 finally:
     # Clean up
+    lcd.clear()
     red_pwm.stop()
     green_pwm.stop()
     blue_pwm.stop()
