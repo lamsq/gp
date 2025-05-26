@@ -58,7 +58,7 @@ try:
         elif direction==False:
             motor_step_counter = (motor_step_counter + 1) % 8
         else: # defensive programming
-            print( "uh oh... direction should *always* be either True or False" )
+            print( "direction should *always* be either True or False" )
             cleanup()
             exit( 1 )
         time.sleep( step_sleep )

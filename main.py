@@ -75,7 +75,7 @@ def run_motor_open():
         set_led_color(50, 0, 100) # YELLOW for wait
         subprocess.run(["python3", MOTOR_SCRIPT], check=True)
         door_closed = False
-        print("motor.py executed successfully.")
+                    print("opening the door")
     except FileNotFoundError:
         print(f"Error: {MOTOR_SCRIPT} not found.")
     except subprocess.CalledProcessError as e:
@@ -87,8 +87,7 @@ def run_motor_close():
     try:
         subprocess.run(["python3", MOTOR_SCRIPT_II], check=True)
         door_closed = True
-        print('door is closed check:')
-        print("motorII.py executed successfully.")
+        print('door is closed')
     except FileNotFoundError:
         print(f"Error: {MOTOR_SCRIPT_II} not found.")
     except subprocess.CalledProcessError as e:
@@ -119,7 +118,6 @@ try:
 
         # Wait for button press
         if GPIO.input(BUTTON_PIN) == GPIO.LOW and door_closed:  # Button pressed (KY-004 pulls to GND when pressed)
-            print("opening the door")
             lcd.clear()
             lcd.write_string("Move out the way")
             run_motor_open()

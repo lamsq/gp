@@ -107,7 +107,7 @@ class FaceRecognizer:
             while time.time() < end_time:
                 # Capture a frame from camera
                 frame = self.picam2.capture_array()
-                
+                    
                 # Process the frame
                 face_locations, face_names, recognized = self.process_frame(frame)
                 
