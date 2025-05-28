@@ -75,7 +75,7 @@ def run_motor_open():
         set_led_color(50, 0, 100) # YELLOW for wait
         subprocess.run(["python3", MOTOR_SCRIPT], check=True)
         door_closed = False
-                    print("opening the door")
+        print("opening the door")
     except FileNotFoundError:
         print(f"Error: {MOTOR_SCRIPT} not found.")
     except subprocess.CalledProcessError as e:

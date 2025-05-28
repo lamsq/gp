@@ -116,8 +116,9 @@ class FaceRecognizer:
                     # If recognized in specified amount of frames, return true
                     match_counter += 1
                     self.name = face_names
-                    print(self.name)
-                    print(match_counter)
+                    j/?
+                    #print(self.name)
+                    #print(match_counter)
                     if match_counter >= match_needed:
                         
                         return True
