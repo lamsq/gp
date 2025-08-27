@@ -1,4 +1,4 @@
-# Facial Recognition Access Control
+#  Access Control with Facial Recognition
 
 A real-time facial recognition security system built for the Raspberry Pi 4. It uses an infrared camera to identify users and controls a motor to grant access.
 
@@ -16,8 +16,7 @@ I designed and engineered the complete hardware and software solution:
 *   Raspberry Pi 4
 *   Infrared Camera Module
 *   Servo Motor
-*   LED Indicator
-*   LED Display
+*   LED Display and Indicators
 
 ## Skills & Technologies Highlighted
 
@@ -34,14 +33,13 @@ This project demonstrates:
 ### Prerequisites
 
 *   Raspberry Pi 4
-*   Python 3
-*   pip
+*   Python 3 and pip
 
 ### Setup
 
 1.  **Clone the repository:**
     ```sh
-    git clone <your-repo-url>
+    git clone git@github.com:lamsq/gp.git
     cd gp
     ```
 2.  **Create and activate a virtual environment:**
